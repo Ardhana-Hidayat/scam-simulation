@@ -1,0 +1,57 @@
+<h2>📋 Data User yang Klik Link</h2>
+<table id="userTable" border="1" cellpadding="5">
+  <thead>
+    <tr>
+      <th>Waktu</th>
+      <th>IP</th>
+      <th>Kota</th>
+      <th>Negara</th>
+      <th>Koordinat</th>
+      <th>Platform</th>
+      <th>Resolusi</th>
+      <th>Maps</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+fetch("https://script.google.com/macros/s/AKfycbxE-jKDj3LfqMNDAxout8CTCwTazIpdpWnYwRWdcc4iqSviEglxdA5F7YgDhkKTopWq/exec")
+  .then(res => res.json())
+  .then(data => {
+    const tbody = document.querySelector("#userTable tbody");
+
+    // Lewati baris pertama (header)
+    data.slice(1).reverse().forEach(row => {
+      const timestamp = row[0] || "-";
+      const ip = row[1] || "-";
+      const city = row[2] || "-";
+      const country = row[3] || "-";
+      const loc = row[4] || "-";
+      const platform = row[6] || "-";
+      const resolution = row[7] || "-";
+
+      // Auto generate map link jika tidak tersedia
+      const mapsLink = row[8] || (loc !== "-" ? `https://maps.google.com/maps?q=${loc}&z=15` : "-");
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${timestamp}</td>
+        <td>${ip}</td>
+        <td>${city}</td>
+        <td>${country}</td>
+        <td>${loc}</td>
+        <td>${platform}</td>
+        <td>${resolution}</td>
+        <td>${mapsLink !== "-" ? `<a href="${mapsLink}" target="_blank">Lihat Maps</a>` : "-"}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  })
+  .catch(err => {
+    console.error("Gagal mengambil data:", err);
+    document.querySelector("#userTable tbody").innerHTML = `
+      <tr><td colspan="8">Gagal memuat data dari Google Sheets.</td></tr>
+    `;
+  });
+</script>
