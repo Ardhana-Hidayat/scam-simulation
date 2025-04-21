@@ -32,7 +32,7 @@ fetch("https://script.google.com/macros/s/AKfycbxE-jKDj3LfqMNDAxout8CTCwTazIpdpW
       const resolution = row[7] || "-";
 
       // Auto generate map link jika tidak tersedia
-      const mapsLink = row[8] || (loc !== "-" ? `https://maps.google.com/maps?q=${loc}&z=15` : "-");
+      const mapsLink = row[8] ? row[8] : (loc !== "-" ? `https://maps.google.com/maps?q=${loc}&z=15` : "-");
 
       const tr = document.createElement("tr");
       tr.innerHTML = `
